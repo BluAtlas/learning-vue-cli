@@ -4,9 +4,11 @@
         :active-page="activePage"
     ></navbar>
 
-    <page-viewer :page="pages[activePage]"></page-viewer>
+    <router-view></router-view>
 
-    <create-page @page-created="pageCreated"></create-page>
+    <!-- <page-viewer :page="pages[activePage]"></page-viewer> -->
+
+    <!-- <create-page @page-created="pageCreated"></create-page> -->
 </template>
 
 <script>
