@@ -1,4 +1,8 @@
 <template>
+    <!--edit {{ props.index }}-->
+    <!-- edit {{ route.params.index }} -->
+    <h4>Edit {{ page.pageTitle }}</h4>
+
     <form
         action=""
         class="container mb-3"
@@ -13,7 +17,7 @@
                     <input
                         type="text"
                         class="form-control"
-                        v-model="pageTitle"
+                        v-model="page.pageTitle"
                     />
                 </div>
                 <div class="mb-3">
@@ -25,7 +29,7 @@
                         type="text"
                         class="form-control"
                         rows="5"
-                        v-model="content"
+                        v-model="page.content"
                     ></textarea>
                 </div>
             </div>
@@ -38,16 +42,15 @@
                     <input
                         type="text"
                         class="form-control"
-                        v-model="linkText"
+                        v-model="page.link.text"
                     />
                 </div>
-
                 <div class="row mb-3">
                     <div class="form-check">
                         <input
                             class="form-check-input"
                             type="checkbox"
-                            v-model="published"
+                            v-model="page.published"
                         >
                         <label
                             class="form-check-label"
@@ -59,53 +62,56 @@
         </div>
         <div class="mb-3">
             <button
-                class="btn btn-primary"
-                :disabled="isFormInvalid"
-                @click.prevent="submitForm"
-            >Create Page</button>
+                class="btn btn-primary me-2"
+                @click.prevent="submit"
+            >Edit</button>
+            <button
+                class="btn btn-secondary me-2"
+                @click.prevent="goToPagesList"
+            >Cancel</button>
+
+            <button
+                class="btn btn-danger"
+                @click.prevent="deletePage"
+            >Delete</button>
         </div>
     </form>
 </template>
 
 <script setup>
-import { inject, ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-const bus = inject('$bus');
-const pages = inject('$pages');
+import { inject } from 'vue';
+import { buildSlots } from '@vue/compiler-core';
+
 const router = useRouter();
+const pages = inject('$pages');
+const bus = inject('$bus');
 
-let pageTitle = ref('');
-let content = ref('');
-let linkText = ref('');
-let published = ref(true);
+const { index } = defineProps(['index']);
 
-function submitForm() {
-    if (!pageTitle || !content || !linkText) {
-        alert('Please fill the form.');
-        return;
-    }
+let page = pages.getSinglePage(index);
 
-    let newPage = {
-        pageTitle: pageTitle.value,
-        content: content.value,
-        link: {
-            text: linkText.value,
-        },
-        published: published.value
-    }
+function submit() {
+    pages.editPage(index, page);
 
-    pages.addPage(newPage);
+    bus.$emit('page-updated', {
+        index,
+        page
+    })
 
-    bus.$emit('page-created', newPage);
+    goToPagesList();
+}
 
+function deletePage() {
+    pages.removePage(index);
+
+    bus.$emit('page-deleted', { index })
+
+    goToPagesList();
+}
+
+function goToPagesList() {
     router.push({ path: '/pages' })
 }
 
-const isFormInvalid = computed(() => !pageTitle || !content || !linkText)
-
-watch(pageTitle, (newTitle, oldTitle) => {
-    if (linkText.value === oldTitle) {
-        linkText.value = newTitle
-    }
-})
 </script>

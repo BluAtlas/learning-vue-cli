@@ -11,6 +11,7 @@
 <script>
 export default {
     props: ['index'],
+    inject: ['$pages'], // due to provide($pages) in main.js
     created() {
         this.page = this.$pages.getSinglePage(this.index);
 

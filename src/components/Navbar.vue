@@ -16,11 +16,11 @@
 
                 <li>
                     <router-link
-                        to="/pages/create"
+                        to="/pages/"
                         class="nav-link"
                         aria-current="page"
                         active-class="active"
-                    > Create Page </router-link>
+                    > Pages </router-link>
                 </li>
             </ul>
             <form class="d-flex">
@@ -42,10 +42,23 @@ export default {
     components: {
         navbarLink
     },
+    inject: ['$pages', '$bus'],
     created() {
         this.getThemeSetting();
 
         this.pages = this.$pages.getAllPages();
+
+        this.$bus.$on('page-updated', () => {
+            this.pages = [...this.$pages.getAllPages()];
+        })
+
+        this.$bus.$on('page-created', () => {
+            this.pages = [...this.$pages.getAllPages()];
+        })
+
+        this.$bus.$on('page-deleted', () => {
+            this.pages = [...this.$pages.getAllPages()];
+        })
     },
     computed: {
         publishedPages() {
@@ -72,13 +85,11 @@ export default {
         storeThemeSetting() {
             localStorage.setItem('theme', this.theme);
         },
-
         getThemeSetting() {
             let theme = localStorage.getItem('theme');
             if (theme) {
                 this.theme = theme;
             }
-
         }
     }
 }
